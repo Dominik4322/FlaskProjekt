@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moje gry</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #1e1e2f;
+            color: white;
+            text-align: center;
+        }
+
+        .game {
+            background: #2f2f4f;
+            margin: 10px auto;
+            padding: 15px;
+            width: 400px;
+            border-radius: 10px;
+        }
+
+        a {
+            color: #ff4757;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📚 Moje gry</h1>
+
+    <a href="/">⬅️ Wróć</a>
+
+    {% if games %}
+        {% for game in games %}
+            <div class="game">
+                <h3>{{ game.name }}</h3>
+
+                {% if game.rating %}
+                    <p>⭐ Rating: {{ game.rating }}</p>
+                {% endif %}
+
+                {% if game.release_date %}
+                    <p>📅 Data: {{ game.release_date }}</p>
+                {% endif %}
+                <form action="/delete-game/{{ game.id }}" method="POST">
+                    <button type="submit">❌ Usuń</button>
+                </form>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Brak zapisanych gier 😢</p>
+    {% endif %}
+
+</body>
+</html>
