@@ -1,9 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Moja strona</title>
+    <title>Game Explorer</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #1e1e2f;
+            color: white;
+            text-align: center;
+        }
+
+        input {
+            padding: 10px;
+            width: 300px;
+        }
+
+        button {
+            padding: 10px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .game {
+            background: #2f2f4f;
+            margin: 10px auto;
+            padding: 15px;
+            width: 400px;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hej! To moja strona we Flasku 😎</h1>
+
+    <h1>🎮 Game Explorer</h1>
+
+    <form method="POST">
+        <input type="text" name="name" placeholder="Wpisz nazwę gry...">
+        <button type="submit">Szukaj</button>
+    </form>
+
+    <div>
+        {% for game in games %}
+            <div class="game">
+                <h3>{{ game.name }}</h3>
+
+                {% if game.rating %}
+                    <p>⭐ Rating: {{ game.rating|round(1) }}</p>
+                {% endif %}
+
+                {% if game.first_release_date %}
+                    <p>📅 Data: {{ game.first_release_date }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
 </body>
 </html>
