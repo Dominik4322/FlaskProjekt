@@ -3,7 +3,7 @@ from extensions import db
 from models import Game
 from services.igdb_service import search_games
 import datetime
-from flask import redirect
+from flask import redirect, flash
 
 main = Blueprint("main", __name__)
 
@@ -11,6 +11,9 @@ main = Blueprint("main", __name__)
 # Strona główna + wyszukiwanie + sortowanie
 @main.route("/", methods=["GET"])
 def home():
+    from flask import request
+    import datetime
+
     name = request.args.get("name")
     sort = request.args.get("sort", "rating")
     order = request.args.get("order", "desc")
@@ -18,9 +21,8 @@ def home():
     games = []
 
     if name:
+        # 🌐 tylko IGDB — bez zapisu
         games = search_games(name)
-
-        import datetime
 
         for g in games:
             if "first_release_date" in g:
@@ -28,15 +30,15 @@ def home():
                     g["first_release_date"]
                 ).strftime("%Y-%m-%d")
 
-        # 🔽 SORTOWANIE (na liście Pythonowej, nie DB)
-        if sort == "rating":
-            games.sort(key=lambda x: x.get("rating", 0), reverse=(order == "desc"))
+    # 🔽 sortowanie
+    if sort == "rating":
+        games.sort(key=lambda x: x.get("rating", 0), reverse=(order == "desc"))
 
-        elif sort == "name":
-            games.sort(key=lambda x: x.get("name", ""), reverse=(order == "desc"))
+    elif sort == "name":
+        games.sort(key=lambda x: x.get("name", ""), reverse=(order == "desc"))
 
-        elif sort == "date":
-            games.sort(key=lambda x: x.get("first_release_date", ""), reverse=(order == "desc"))
+    elif sort == "date":
+        games.sort(key=lambda x: x.get("first_release_date", ""), reverse=(order == "desc"))
 
     return render_template("index.html", games=games)
 
@@ -50,20 +52,21 @@ def add_game():
 
     existing = Game.query.filter_by(igdb_id=igdb_id).first()
 
-    if not existing:
+    if existing:
+        flash("Gra już jest w Twojej kolekcji ⚠️")
+    else:
         game = Game(
             igdb_id=igdb_id,
             name=name,
             rating=float(rating) if rating else None,
             release_date=release_date if release_date else None
         )
-
         db.session.add(game)
         db.session.commit()
 
-    # 👇 TO ZAMIENIA JSON NA NAWIGACJĘ
-    return redirect("/")
+        flash("Dodano grę do kolekcji ✅")
 
+    return redirect(request.referrer or "/")
 
 # 📚 Lista zapisanych gier (na razie JSON)
 @main.route("/my-games")

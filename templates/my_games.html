@@ -2,86 +2,72 @@
 <html>
 <head>
     <title>Moje gry</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #1e1e2f;
-            color: white;
-            text-align: center;
-        }
-
-        .game {
-            background: #2f2f4f;
-            margin: 10px auto;
-            padding: 15px;
-            width: 400px;
-            border-radius: 10px;
-        }
-
-        a {
-            color: #ff4757;
-            text-decoration: none;
-        }
-
-        form {
-            margin: 10px;
-        }
-
-        input, select, button {
-            padding: 8px;
-            margin: 5px;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-dark text-light">
 
-    <h1>📚 Moje gry</h1>
+<div class="container py-4">
 
-    <a href="/">⬅️ Wróć</a>
+    <h1 class="mb-4">📚 Moje gry</h1>
 
-    <!-- 🔍 FILTROWANIE + SORTOWANIE -->
-    <form method="GET">
-        <input type="text" name="search" placeholder="Szukaj gry..." 
-               value="{{ request.args.get('search', '') }}">
+    <a href="/" class="btn btn-outline-light mb-3">⬅️ Wróć</a>
 
-        <select name="sort">
-            <option value="rating" {% if request.args.get('sort') == 'rating' %}selected{% endif %}>Rating</option>
-            <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Nazwa</option>
-            <option value="date" {% if request.args.get('sort') == 'date' %}selected{% endif %}>Data</option>
-        </select>
+    <!-- 🔍 FILTER -->
+    <form method="GET" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Szukaj..."
+                   value="{{ request.args.get('search','') }}">
+        </div>
 
-        <select name="order">
-            <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Malejąco ↓</option>
-            <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Rosnąco ↑</option>
-        </select>
+        <div class="col-md-3">
+            <select name="sort" class="form-select">
+                <option value="rating">Rating</option>
+                <option value="name">Nazwa</option>
+                <option value="date">Data</option>
+            </select>
+        </div>
 
-        <button type="submit">Zastosuj</button>
+        <div class="col-md-2">
+            <select name="order" class="form-select">
+                <option value="desc">↓</option>
+                <option value="asc">↑</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-danger w-100">Zastosuj</button>
+        </div>
     </form>
 
-    <hr>
-
-    {% if games %}
+    <div class="row">
         {% for game in games %}
-            <div class="game">
-                <h3>{{ game.name }}</h3>
+        <div class="col-md-4 mb-4">
+            <div class="card bg-secondary text-light h-100">
 
-                {% if game.rating %}
-                    <p>⭐ Rating: {{ game.rating }}</p>
-                {% endif %}
+                <div class="card-body">
+                    <h5>{{ game.name }}</h5>
 
-                {% if game.release_date %}
-                    <p>📅 Data: {{ game.release_date }}</p>
-                {% endif %}
+                    {% if game.rating %}
+                        <p>⭐ {{ game.rating }}</p>
+                    {% endif %}
 
-                <form action="/delete-game/{{ game.id }}" method="POST" 
-                      onsubmit="return confirm('Na pewno usunąć?')">
-                    <button type="submit">❌ Usuń</button>
-                </form>
+                    {% if game.release_date %}
+                        <p>📅 {{ game.release_date }}</p>
+                    {% endif %}
+
+                    <form action="/delete-game/{{ game.id }}" method="POST">
+                        <button class="btn btn-danger w-100">❌ Usuń</button>
+                    </form>
+
+                </div>
+
             </div>
+        </div>
         {% endfor %}
-    {% else %}
-        <p>Brak zapisanych gier 😢</p>
-    {% endif %}
+    </div>
+
+</div>
 
 </body>
 </html>

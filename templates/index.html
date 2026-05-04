@@ -1,51 +1,93 @@
-<body>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
 
-    <h1>🎮 Game Explorer</h1>
+<div class="container py-4">
 
-    <form method="GET">
-    <input type="text" name="name" placeholder="Wpisz nazwę gry..." 
-           value="{{ request.args.get('name', '') }}">
-
-    <select name="sort">
-        <option value="rating" {% if request.args.get('sort', 'rating') == 'rating' %}selected{% endif %}>Rating</option>
-        <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Nazwa</option>
-        <option value="date" {% if request.args.get('sort') == 'date' %}selected{% endif %}>Data</option>
-    </select>
-
-    <select name="order">
-        <option value="desc" {% if request.args.get('order', 'desc') == 'desc' %}selected{% endif %}>Malejąco ↓</option>
-        <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Rosnąco ↑</option>
-    </select>
-
-    <button type="submit">Szukaj</button>
-    </form>
-    
-    <!-- 🎮 WYNIKI -->
-    {% for game in games %}
-        <div class="game">
-            <h3>{{ game.name }}</h3>
-            
-            {% if game.cover %}
-                <img src="https:{{ game.cover.url.replace('t_thumb', 't_cover_big') }}" width="200">
-            {% endif %}
-
-            {% if game.rating %}
-                <p>⭐ Rating: {{ game.rating|round(1) }}</p>
-            {% endif %}
-
-            {% if game.first_release_date %}
-                <p>📅 Data: {{ game.first_release_date }}</p>
-            {% endif %}
-
-            <form action="/add-game" method="POST">
-                <input type="hidden" name="igdb_id" value="{{ game.id }}">
-                <input type="hidden" name="name" value="{{ game.name }}">
-                <input type="hidden" name="rating" value="{{ game.rating }}">
-                <input type="hidden" name="release_date" value="{{ game.first_release_date }}">
-
-                <button type="submit">💾 Dodaj do bazy</button>
-            </form>
+    <h1 class="mb-4">🎮 Game Explorer</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-success">
+                {% for msg in messages %}
+                    <div class="alert alert-{{ category }}">
+                    {{ msg }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <!-- 🔍 FORM -->
+    <form method="GET" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <input type="text" name="name" class="form-control"
+                   placeholder="Wpisz nazwę gry..."
+                   value="{{ request.args.get('name', '') }}">
         </div>
-    {% endfor %}
+
+        <div class="col-md-2">
+            <select name="sort" class="form-select">
+                <option value="rating" {% if request.args.get('sort','rating')=='rating' %}selected{% endif %}>Rating</option>
+                <option value="name" {% if request.args.get('sort')=='name' %}selected{% endif %}>Nazwa</option>
+                <option value="date" {% if request.args.get('sort')=='date' %}selected{% endif %}>Data</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select name="order" class="form-select">
+                <option value="desc" {% if request.args.get('order','desc')=='desc' %}selected{% endif %}>↓</option>
+                <option value="asc" {% if request.args.get('order')=='asc' %}selected{% endif %}>↑</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-danger w-100">Szukaj</button>
+        </div>
+    </form>
+
+    <a href="/my-games" class="btn btn-outline-light mb-3">📚 Moje gry</a>
+
+    <!-- 🎮 GRID -->
+    <div class="row">
+        {% for game in games %}
+        <div class="col-md-4 mb-4">
+            <div class="card bg-secondary text-light h-100">
+
+                {% if game.cover %}
+                <img src="https:{{ game.cover.url.replace('t_thumb','t_cover_big') }}"
+                    class="card-img-top">
+                {% endif %}
+
+                <div class="card-body">
+                    <h5 class="card-title">{{ game.name }}</h5>
+
+                    {% if game.rating %}
+                        <p>⭐ {{ game.rating|round(1) }}</p>
+                    {% endif %}
+
+                    {% if game.first_release_date %}
+                        <p>📅 {{ game.first_release_date }}</p>
+                    {% endif %}
+
+                    <form action="/add-game" method="POST">
+                        <input type="hidden" name="igdb_id" value="{{ game.id }}">
+                        <input type="hidden" name="name" value="{{ game.name }}">
+                        <input type="hidden" name="rating" value="{{ game.rating }}">
+                        <input type="hidden" name="release_date" value="{{ game.first_release_date }}">
+
+                        <button class="btn btn-primary w-100">💾 Dodaj</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
 
 </body>
+</html>
