@@ -8,26 +8,37 @@ from flask import redirect
 main = Blueprint("main", __name__)
 
 
-# 🔍 Strona główna + wyszukiwanie
-@main.route("/", methods=["GET", "POST"])
+# Strona główna + wyszukiwanie + sortowanie
+@main.route("/", methods=["GET"])
 def home():
+    name = request.args.get("name")
+    sort = request.args.get("sort", "rating")
+    order = request.args.get("order", "desc")
+
     games = []
 
-    if request.method == "POST":
-        name = request.form.get("name")
+    if name:
+        games = search_games(name)
 
-        if name:
-            games = search_games(name)
+        import datetime
 
-            # konwersja daty z timestamp
-            for g in games:
-                if "first_release_date" in g:
-                    g["first_release_date"] = datetime.datetime.fromtimestamp(
-                        g["first_release_date"]
-                    ).strftime("%Y-%m-%d")
+        for g in games:
+            if "first_release_date" in g:
+                g["first_release_date"] = datetime.datetime.fromtimestamp(
+                    g["first_release_date"]
+                ).strftime("%Y-%m-%d")
+
+        # 🔽 SORTOWANIE (na liście Pythonowej, nie DB)
+        if sort == "rating":
+            games.sort(key=lambda x: x.get("rating", 0), reverse=(order == "desc"))
+
+        elif sort == "name":
+            games.sort(key=lambda x: x.get("name", ""), reverse=(order == "desc"))
+
+        elif sort == "date":
+            games.sort(key=lambda x: x.get("first_release_date", ""), reverse=(order == "desc"))
 
     return render_template("index.html", games=games)
-
 
 # 💾 Dodawanie gry do bazy
 @main.route("/add-game", methods=["POST"])
@@ -57,7 +68,36 @@ def add_game():
 # 📚 Lista zapisanych gier (na razie JSON)
 @main.route("/my-games")
 def my_games():
-    games = Game.query.all()
+    search = request.args.get("search")
+    sort = request.args.get("sort")
+    order = request.args.get("order", "desc")  # domyślnie malejąco
+
+    query = Game.query
+
+    # 🔍 filtrowanie
+    if search:
+        query = query.filter(Game.name.ilike(f"%{search}%"))
+
+    # 🔽 sortowanie
+    if sort == "rating":
+        if order == "asc":
+            query = query.order_by(Game.rating.asc())
+        else:
+            query = query.order_by(Game.rating.desc())
+
+    elif sort == "name":
+        if order == "asc":
+            query = query.order_by(Game.name.asc())
+        else:
+            query = query.order_by(Game.name.desc())
+
+    elif sort == "date":
+        if order == "asc":
+            query = query.order_by(Game.release_date.asc())
+        else:
+            query = query.order_by(Game.release_date.desc())
+
+    games = query.all()
 
     return render_template("my_games.html", games=games)
 

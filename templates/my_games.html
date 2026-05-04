@@ -22,6 +22,15 @@
             color: #ff4757;
             text-decoration: none;
         }
+
+        form {
+            margin: 10px;
+        }
+
+        input, select, button {
+            padding: 8px;
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
@@ -29,6 +38,27 @@
     <h1>📚 Moje gry</h1>
 
     <a href="/">⬅️ Wróć</a>
+
+    <!-- 🔍 FILTROWANIE + SORTOWANIE -->
+    <form method="GET">
+        <input type="text" name="search" placeholder="Szukaj gry..." 
+               value="{{ request.args.get('search', '') }}">
+
+        <select name="sort">
+            <option value="rating" {% if request.args.get('sort') == 'rating' %}selected{% endif %}>Rating</option>
+            <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Nazwa</option>
+            <option value="date" {% if request.args.get('sort') == 'date' %}selected{% endif %}>Data</option>
+        </select>
+
+        <select name="order">
+            <option value="desc" {% if request.args.get('order') == 'desc' %}selected{% endif %}>Malejąco ↓</option>
+            <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Rosnąco ↑</option>
+        </select>
+
+        <button type="submit">Zastosuj</button>
+    </form>
+
+    <hr>
 
     {% if games %}
         {% for game in games %}
@@ -42,7 +72,9 @@
                 {% if game.release_date %}
                     <p>📅 Data: {{ game.release_date }}</p>
                 {% endif %}
-                <form action="/delete-game/{{ game.id }}" method="POST">
+
+                <form action="/delete-game/{{ game.id }}" method="POST" 
+                      onsubmit="return confirm('Na pewno usunąć?')">
                     <button type="submit">❌ Usuń</button>
                 </form>
             </div>

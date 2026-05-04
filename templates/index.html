@@ -2,19 +2,32 @@
 
     <h1>🎮 Game Explorer</h1>
 
-    <!-- 🔍 WYSZUKIWARKA (TO MUSI BYĆ!) -->
-    <form method="POST">
-        <input type="text" name="name" placeholder="Wpisz nazwę gry...">
-        <button type="submit">Szukaj</button>
-        <a href="/my-games">📚 Moje gry</a>
-    </form>
+    <form method="GET">
+    <input type="text" name="name" placeholder="Wpisz nazwę gry..." 
+           value="{{ request.args.get('name', '') }}">
 
-    <hr>
+    <select name="sort">
+        <option value="rating" {% if request.args.get('sort', 'rating') == 'rating' %}selected{% endif %}>Rating</option>
+        <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Nazwa</option>
+        <option value="date" {% if request.args.get('sort') == 'date' %}selected{% endif %}>Data</option>
+    </select>
+
+    <select name="order">
+        <option value="desc" {% if request.args.get('order', 'desc') == 'desc' %}selected{% endif %}>Malejąco ↓</option>
+        <option value="asc" {% if request.args.get('order') == 'asc' %}selected{% endif %}>Rosnąco ↑</option>
+    </select>
+
+    <button type="submit">Szukaj</button>
+    </form>
     
     <!-- 🎮 WYNIKI -->
     {% for game in games %}
         <div class="game">
             <h3>{{ game.name }}</h3>
+            
+            {% if game.cover %}
+                <img src="https:{{ game.cover.url.replace('t_thumb', 't_cover_big') }}" width="200">
+            {% endif %}
 
             {% if game.rating %}
                 <p>⭐ Rating: {{ game.rating|round(1) }}</p>

@@ -32,7 +32,7 @@ def search_games(name):
     }
 
     body = f'''
-    fields name, rating, first_release_date;
+    fields name, rating, first_release_date, cover.url;
     search "{name}";
     limit 5;
     '''
